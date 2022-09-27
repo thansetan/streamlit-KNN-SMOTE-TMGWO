@@ -9,14 +9,14 @@ import functools
 import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
-from imblearn.over_sampling import SMOTENC
+from imblearn.over_sampling import SMOTE, SMOTENC
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     accuracy_score,
     classification_report,
     confusion_matrix,
 )
-from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
@@ -29,13 +29,18 @@ def load_dataset(dataset):
 
 
 def preprocess(data):
-    objectList = data.select_dtypes(include="object").columns
-    intList = data.select_dtypes(include="int64").columns
+    attributes = data.drop(data.columns[-1], axis=1)
+    label = data.columns[-1]
+    labelType = data.dtypes[label]
+    objectList = attributes.select_dtypes(include="object").columns
+    numList = attributes.select_dtypes(include=["int", "float"]).columns
     le = LabelEncoder()
     scaler = MinMaxScaler()
+    if labelType == "O":
+        data[label] = le.fit_transform(data[label])
     for feature in objectList:
         data[feature] = le.fit_transform(data[feature])
-    for feature in intList:
+    for feature in numList:
         data[[feature]] = scaler.fit_transform(data[[feature]])
     joblib.dump(scaler, "models/scaler.pkl")
     return data
@@ -112,28 +117,32 @@ def plot_selected_features(X, selected_features):
 
 
 def do_smote(X_train, y_train):
-    smote = SMOTENC(
-        random_state=42,
-        categorical_features=[
-            False,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-            True,
-        ],
-    )
-    X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+    try:
+        smote = SMOTENC(
+            random_state=42,
+            categorical_features=[
+                False,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+            ],
+        )
+        X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+    except:
+        smote = SMOTE(random_state=42)
+        X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
     return X_train_smote, y_train_smote
 
 
