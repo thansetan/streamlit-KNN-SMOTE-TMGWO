@@ -10,8 +10,12 @@ import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 from imblearn.over_sampling import SMOTENC
-from sklearn.metrics import (ConfusionMatrixDisplay, accuracy_score,
-                             classification_report, confusion_matrix)
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+)
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
@@ -152,9 +156,8 @@ hasil["akurasi"] = {}
 hasil["cm"] = {}
 hasil["cr"] = {}
 
-def train_model(
-    X_train, X_test, y_train, y_test, algoritma
-):
+
+def train_model(X_train, X_test, y_train, y_test, algoritma):
     model = KNeighborsClassifier(metric="jaccard", n_neighbors=5)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)

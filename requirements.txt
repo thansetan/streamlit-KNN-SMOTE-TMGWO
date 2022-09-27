@@ -1,0 +1,5 @@
+scikit-learn==1.1.2
+imbalanced-learn==0.9.1
+numpy==1.23.3
+pandas==1.4.4
+matplotlib==3.5.3
