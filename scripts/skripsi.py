@@ -10,12 +10,8 @@ import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 from imblearn.over_sampling import SMOTE, SMOTENC
-from sklearn.metrics import (
-    ConfusionMatrixDisplay,
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
-)
+from sklearn.metrics import (ConfusionMatrixDisplay, accuracy_score,
+                             classification_report, confusion_matrix)
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
@@ -138,10 +134,11 @@ def do_smote(X_train, y_train):
                 True,
                 True,
             ],
+            k_neighbors=5,
         )
         X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
     except:
-        smote = SMOTE(random_state=42)
+        smote = SMOTE(random_state=42, k_neighbors=5)
         X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
     return X_train_smote, y_train_smote
 

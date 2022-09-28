@@ -51,7 +51,7 @@ if st.session_state.splitted:
         }
     selected_features_dict = pd.DataFrame(selected_features_dict)
     selected_features_dict.index+=1
-    st.table(selected_features_dict)
+    st.dataframe(selected_features_dict, use_container_width=True)
 else:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 80px'>Seleksi Fitur dengan TMGWO</h1>",
