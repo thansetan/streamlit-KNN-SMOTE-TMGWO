@@ -11,28 +11,18 @@ st.set_page_config(
     page_icon="random",
 )
 
-akurasi_df = pd.DataFrame()
+akurasi_dict = {}
+try:
+    for key in hasil['cross_val']['akurasi'].keys():
+        akurasi_dict[key] = [akurasi for akurasi in hasil['cross_val']['akurasi'][key]]
+except:
+    pass
 if "dataset" not in st.session_state:
     st.session_state.dataset = None
-if "knn_trained" not in st.session_state or not hasil['akurasi']:
-    st.session_state.knn_trained = False
-if "knn_smote_trained" not in st.session_state or not hasil['akurasi']:
-    st.session_state.knn_smote_trained = False
-if "knn_smote_tmgwo_trained" not in st.session_state or not hasil['akurasi']:
-    st.session_state.knn_smote_tmgwo_trained = False
 if "trained" not in st.session_state:
     st.session_state.trained = False
 
-if st.session_state.knn_trained:
-    akurasi_df = akurasi_df.assign(KNN=pd.read_csv("cross_val_results/knn_acc.csv"))
-if st.session_state.knn_smote_trained:
-    akurasi_df = akurasi_df.assign(KNN_SMOTE=pd.read_csv("cross_val_results/knn_smote_acc.csv"))
-    akurasi_df.rename(columns={"KNN_SMOTE": "KNN+SMOTE"}, inplace=True)
-if st.session_state.knn_smote_tmgwo_trained:
-    akurasi_df = akurasi_df.assign(KNN_SMOTE_TMGWO=pd.read_csv("cross_val_results/knn_smote_tmgwo_acc.csv"))
-    akurasi_df.rename(columns={"KNN_SMOTE_TMGWO": "KNN+SMOTE+TMGWO"}, inplace=True)
-    num_features = pd.read_csv("cross_val_results/num_selected_features.csv")
-if st.session_state.trained and hasil['akurasi']:
+if st.session_state.trained and akurasi_dict:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 10px'>Hasil Cross Validation</h1>",
         unsafe_allow_html=True,
@@ -41,7 +31,7 @@ if st.session_state.trained and hasil['akurasi']:
     if datacek.columns[0] != "Age":
         st.error("Ndak tahu krn bkn data diabetes", icon="🗿")
     else:
-        akurasi_df = akurasi_df.round(2)
+        akurasi_df = pd.DataFrame(akurasi_dict).round(2)
         akurasi_df.index+=1
         col1,col2 = st.columns([2,1])
         with col1:
@@ -49,9 +39,10 @@ if st.session_state.trained and hasil['akurasi']:
             st.dataframe(akurasi_df.T.style.format("{:.2f}").highlight_max(axis=1,color='#FFCB42').highlight_min(axis=1, color='#EE6983'))
             if st.session_state.knn_smote_tmgwo_trained:
                 st.write("# Jumlah Fitur Terpilih")
+                num_features = pd.DataFrame(hasil["cross_val"]["num_sf"])
                 num_features.index+=1
-                num_features.rename(columns = {"0":'Jumlah Fitur'}, inplace = True)
-                st.dataframe(num_features.T.style.highlight_max(axis=1,color='#FFCB42').highlight_min(axis=1, color='#EE6983'))
+                num_features.rename(columns = {0:'Jumlah Fitur'}, inplace = True)
+                st.dataframe(num_features.T)
         with col2:
             st.write("# Rata-rata", unsafe_allow_html=True)
             ratarata = akurasi_df.mean(axis=0).to_frame()
@@ -62,6 +53,12 @@ if st.session_state.trained and hasil['akurasi']:
                 ratarata_features = num_features.mean(axis=0).to_frame()
                 ratarata_features.rename(columns = {0:'Rata-Rata'}, inplace = True)
                 st.dataframe(ratarata_features.style.format("{:.1f}"))
+elif st.session_state.trained and not akurasi_dict:
+    st.markdown(
+        "<h1 style='text-align: center; margin-bottom: 80px'>Hasil Cross Validation</h1>",
+        unsafe_allow_html=True,
+    )
+    st.warning("Ndak ada hasil cross validation", icon="⚠️")
 else:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 80px'>Hasil Cross Validation</h1>",

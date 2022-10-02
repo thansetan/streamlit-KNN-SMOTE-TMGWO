@@ -30,7 +30,9 @@ if st.session_state.splitted:
         if not st.session_state.feature_selection:
             st.session_state.feature_selection = True
             with st.spinner("Performing feature selection..."):
-                st.session_state.selected_features = feature_selection(X_train, X_test, y_train, y_test)
+                st.session_state.selected_features = feature_selection(
+                    X_train, X_test, y_train, y_test
+                )
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 10px'>Seleksi Fitur dengan TMGWO</h1>",
         unsafe_allow_html=True,
@@ -42,19 +44,26 @@ if st.session_state.splitted:
         unsafe_allow_html=True,
     )
     feature_list = [list(data.columns[:-1])][0]
-    selected_features_list = [col for col, selected in zip(feature_list, st.session_state.selected_features) if selected]
-    selected_features_dict = {"Features": feature_list,
-            "Keterangan": [
-                "Terpilih" if feature in selected_features_list else "Tidak Terpilih"
-                for feature in feature_list
-            ],
-        }
+    selected_features_list = [
+        col
+        for col, selected in zip(feature_list, st.session_state.selected_features)
+        if selected
+    ]
+    selected_features_dict = {
+        "Features": feature_list,
+        "Keterangan": [
+            "Terpilih" if feature in selected_features_list else "Tidak Terpilih"
+            for feature in feature_list
+        ],
+    }
     selected_features_dict = pd.DataFrame(selected_features_dict)
-    selected_features_dict.index+=1
+    selected_features_dict.index += 1
     st.dataframe(selected_features_dict, use_container_width=True)
 else:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 80px'>Seleksi Fitur dengan TMGWO</h1>",
         unsafe_allow_html=True,
     )
-    st.warning("Tolong bukanya dari atas-bawah, jangan dilewatin. terima kasih.", icon="⚠️")
+    st.warning(
+        "Tolong bukanya dari atas-bawah, jangan dilewatin. terima kasih.", icon="⚠️"
+    )

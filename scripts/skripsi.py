@@ -12,7 +12,7 @@ import pandas as pd
 from imblearn.over_sampling import SMOTE, SMOTENC
 from sklearn.metrics import (ConfusionMatrixDisplay, accuracy_score,
                              classification_report, confusion_matrix)
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
@@ -157,13 +157,62 @@ def plot_smote(y_train_smote):
     return fig
 
 
+
+
+
+def split_for_crossval(X, y):
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, random_state=42, test_size=0.2, stratify=y, shuffle=True
+    )
+    return X_train, y_train
+
+
 hasil = {}
 hasil["akurasi"] = {}
 hasil["cm"] = {}
 hasil["cr"] = {}
+hasil["cross_val"] = {}
+hasil["cross_val"]["num_sf"] = []
+hasil["cross_val"]["akurasi"] = {}
+hasil["cross_val"]["cm"] = {}
+hasil["cross_val"]["cr"] = {}
 
 
-def train_model(X_train, X_test, y_train, y_test, algoritma):
+def cross_val(X, y, algoritma):
+    hasil["cross_val"]["akurasi"][algoritma] = []
+    hasil["cross_val"]["cm"][algoritma] = []
+    hasil["cross_val"]["cr"][algoritma] = []
+    X_train, y_train = split_for_crossval(X, y)
+    skf = StratifiedKFold(n_splits=10, random_state=42, shuffle=True)
+    for train, test in skf.split(X_train, y_train):
+        X_train, X_test = X[train], X[test]
+        y_train, y_test = y[train], y[test]
+        if algoritma == "KNN+SMOTE+TMGWO":
+            selected_features = feature_selection(X_train, X_test, y_train, y_test)
+        if algoritma == "KNN+SMOTE" or algoritma == "KNN+SMOTE+TMGWO":
+            X_train, y_train = do_smote(X_train, y_train)
+        model = KNeighborsClassifier(metric="jaccard", n_neighbors=5)
+        if algoritma == "KNN+SMOTE+TMGWO":
+            X_train = X_train[:, selected_features]
+            X_test = X_test[:, selected_features]
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        hasil["cross_val"]["akurasi"][algoritma].append(
+            float("{:.2f}".format(accuracy_score(y_test, y_pred) * 100))
+        )
+        hasil["cross_val"]["cm"][algoritma].append(confusion_matrix(y_test, y_pred))
+        hasil["cross_val"]["cr"][algoritma].append(
+            classification_report(
+                y_test, y_pred, output_dict=True, target_names=["Negative", "Positive"]
+            )
+        )
+        if algoritma == "KNN+SMOTE+TMGWO":
+            hasil["cross_val"]["num_sf"].append(list(selected_features).count(True))
+
+
+def train_model(X, y, X_train, X_test, y_train, y_test, algoritma, cv=False):
+    if cv:
+        cross_val(X, y, algoritma)
     model = KNeighborsClassifier(metric="jaccard", n_neighbors=5)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
