@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 np.random.seed(42)
@@ -79,7 +78,7 @@ class TMGWO:
 
             fitness = self.fitness(self.X_alpha)
             Xmutated1 = self.X_alpha.copy()
-            for i in range(len(self.X_alpha)):
+            for i in range(len(self.X_alpha)):  # first mutation
                 r = np.random.uniform()
 
                 if r < self.Mp and self.X_alpha[i] == 1:
@@ -104,17 +103,9 @@ class TMGWO:
             self.score_alpha = self.fitness(self.X_alpha)
             self._iter = self._iter + 1
 
-    def plot_curve(self):
-        plt.figure()
-        plt.title("loss curve [" + str(round(self.gBest_curve[-1], 3)) + "]")
-        plt.plot(self.gBest_curve, label="loss")
-        plt.grid()
-        plt.legend()
-        plt.show()
-
     def update_score(self):
         score_all = self.fitness(self.X)
-        for idx, score in enumerate(score_all):
+        for idx, score in enumerate(score_all):  # second mutation
             if score < self.score_alpha:
                 self.score_alpha = score.copy()
                 self.X_alpha = self.X[idx, :].copy()

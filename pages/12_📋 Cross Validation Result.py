@@ -37,7 +37,7 @@ if st.session_state.trained and akurasi_dict:
         with col1:
             st.write("# Akurasi")
             st.dataframe(akurasi_df.T.style.format("{:.2f}").highlight_max(axis=1,color='#FFCB42').highlight_min(axis=1, color='#EE6983'))
-            if st.session_state.knn_smote_tmgwo_trained:
+            if st.session_state.knn_smote_tmgwo_trained and hasil["cross_val"]["num_sf"]:
                 st.write("# Jumlah Fitur Terpilih")
                 num_features = pd.DataFrame(hasil["cross_val"]["num_sf"])
                 num_features.index+=1
@@ -48,7 +48,7 @@ if st.session_state.trained and akurasi_dict:
             ratarata = akurasi_df.mean(axis=0).to_frame()
             ratarata.rename(columns = {0:'Rata-Rata'}, inplace = True)
             st.dataframe(ratarata.style.format("{:.2f}"))
-            if st.session_state.knn_smote_tmgwo_trained:
+            if st.session_state.knn_smote_tmgwo_trained and hasil["cross_val"]["num_sf"]:
                 st.write("# Rata-rata", unsafe_allow_html=True)
                 ratarata_features = num_features.mean(axis=0).to_frame()
                 ratarata_features.rename(columns = {0:'Rata-Rata'}, inplace = True)
