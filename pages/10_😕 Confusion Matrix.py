@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-from scripts.skripsi import hasil, plot_cm
+from scripts.skripsi import plot_cm, trained
+from sklearn.metrics import confusion_matrix
 
 np.random.seed(42)
 st.set_page_config(
@@ -10,18 +11,23 @@ st.set_page_config(
     layout="centered",
     page_icon="random",
 )
-cm_dict = hasil['cm']
+
+ypred_dict = trained['ypred']
 if "trained" not in st.session_state:
     st.session_state.trained = False
-if st.session_state.trained and cm_dict:
+if "y" not in st.session_state:
+    st.session_state.y = None
+if st.session_state.trained and ypred_dict:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 10px'>Confusion Matrix</h1>",
         unsafe_allow_html=True,
 )
-    for algo, cm in cm_dict.items():
+    y = st.session_state.y
+    for algo, ypred in ypred_dict.items():
+        cm = confusion_matrix(y, ypred)
         col1, col2 = st.columns([5,2])
         with col1:
-            st.pyplot(plot_cm(cm_dict[algo], algo), use_column_width=True)
+            st.pyplot(plot_cm(cm, algo), use_column_width=True)
         with col2:
             TP = cm[1][1]
             TN = cm[0][0]

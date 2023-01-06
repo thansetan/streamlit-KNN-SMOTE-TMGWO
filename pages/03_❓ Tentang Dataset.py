@@ -45,13 +45,14 @@ try:
 except:
     pass
 if st.session_state.dataset:
-    datacek = pd.read_csv(f"datasets/{st.session_state.dataset}")
-    if datacek.columns[0] != "Age":
+    # datacek = pd.read_csv(f"datasets/{st.session_state.dataset}")
+    # if datacek.columns[0] != "Age":
+    if not st.session_state.isDiabetes:
         st.markdown(
             "<h1 style='text-align: center; margin-bottom: 10px'>Informasi Dataset</h1>",
             unsafe_allow_html=True,
         )
-        st.write("Ndak tahu krn bkn data diabetes")
+        st.error("Ndak tahu, bukan data diabetes", icon="🤷‍♂️")
     else:
         st.markdown(
             "<h1 style='text-align: center; margin-bottom: 10px'>Daftar Fitur</h1>",
@@ -65,6 +66,7 @@ if st.session_state.dataset:
         st.table(keterangan)
 else:
     st.markdown(
-        "<h1 style='text-align: center; margin-bottom: 80px'>Informasi Dataset</h1>",unsafe_allow_html=True
+        "<h1 style='text-align: center; margin-bottom: 80px'>Informasi Dataset</h1>",
+        unsafe_allow_html=True,
     )
     st.warning("Silakan pilih dataset terlebih dahulu.", icon="⚠️")

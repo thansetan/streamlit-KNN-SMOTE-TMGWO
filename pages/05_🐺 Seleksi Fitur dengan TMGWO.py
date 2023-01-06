@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 
-np.random.seed(42)
+np.random.seed(8047)
 import streamlit as st
-from scripts.skripsi import feature_selection, plot_selected_features
+
+from scripts.skripsi import (feature_selection, plot_selected_features,
+                             split_X_y)
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -11,28 +13,32 @@ st.set_page_config(
     layout="centered",
     page_icon="random",
 )
-
+if "X" not in st.session_state:
+    st.session_state.X = None
+if "y" not in st.session_state:
+    st.session_state.y = None
+if "preprocessed" not in st.session_state:
+    st.session_state.preprocessed = False
 if "feature_selection" not in st.session_state:
     st.session_state.feature_selection = False
 if "selected_features" not in st.session_state:
     st.session_state.selected_features = None
 if "splitted" not in st.session_state:
     st.session_state.splitted = False
-if st.session_state.splitted:
-    X = st.session_state.X
-    X_train = st.session_state.X_train
-    y_train = st.session_state.y_train
-    X_test = st.session_state.X_test
-    y_test = st.session_state.y_test
+if "X_sf" not in st.session_state:
+    st.session_state.X_sf = None
+if st.session_state.preprocessed:
+    X, y = split_X_y(st.session_state.preprocessed_data)
+    st.session_state.X = X
+    st.session_state.y = y
+    st.session_state.splitted = True
     data = st.session_state.preprocessed_data
     col1, col2, col3 = st.columns(3)
     with col2:
         if not st.session_state.feature_selection:
             st.session_state.feature_selection = True
             with st.spinner("Performing feature selection..."):
-                st.session_state.selected_features = feature_selection(
-                    X_train, X_test, y_train, y_test
-                )
+                st.session_state.selected_features = feature_selection(X, y)
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 10px'>Seleksi Fitur dengan TMGWO</h1>",
         unsafe_allow_html=True,
@@ -56,14 +62,25 @@ if st.session_state.splitted:
             for feature in feature_list
         ],
     }
+    st.session_state.X_sf = X[:, st.session_state.selected_features]
     selected_features_dict = pd.DataFrame(selected_features_dict)
     selected_features_dict.index += 1
     st.dataframe(selected_features_dict, use_container_width=True)
+    st.markdown(
+        "<h1 style='text-align: center; margin-bottom: 10px'>Dataset with Only Selected Features</h1>",
+        unsafe_allow_html=True,
+    )
+    st.dataframe(
+        data[
+            data.columns[np.where(st.session_state.selected_features)].append(
+                pd.Index([data.columns[-1]])
+            )
+        ],
+        use_container_width=True,
+    )
 else:
     st.markdown(
         "<h1 style='text-align: center; margin-bottom: 80px'>Seleksi Fitur dengan TMGWO</h1>",
         unsafe_allow_html=True,
     )
-    st.warning(
-        "Tolong bukanya dari atas-bawah, jangan dilewatin. terima kasih.", icon="⚠️"
-    )
+    st.warning("Silakan lakukan preprocessing terlebih dahulu.", icon="⚠️")
